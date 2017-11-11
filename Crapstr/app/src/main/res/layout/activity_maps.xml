@@ -15,7 +15,7 @@
         map:cameraZoom="15"
         map:uiZoomControls="false" />
 
-    <android.support.v4.widget.NestedScrollView
+    <LinearLayout
         android:id="@+id/bottom_sheet"
         android:layout_width="match_parent"
         android:layout_height="340dp"
@@ -26,5 +26,5 @@
             android:id="@+id/list"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-    </android.support.v4.widget.NestedScrollView>
+    </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>
