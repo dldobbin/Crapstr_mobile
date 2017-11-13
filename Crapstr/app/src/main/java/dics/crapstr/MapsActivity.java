@@ -33,8 +33,6 @@ public class MapsActivity extends FragmentActivity implements
     private static final int LOCATION_REQUEST_CODE = 0;
 
     private GoogleMap mMap;
-    private MapHandler mapHandler;
-    private BottomSheetBehavior mBottomSheetBehavior;
     private GoogleApiClient mGoogleApiClient;
 
     private String[] test = new String[] {"item 1", "item 2", "item 3"};
@@ -50,10 +48,10 @@ public class MapsActivity extends FragmentActivity implements
 
         ListView listView = (ListView)findViewById(R.id.list);
         View bottomSheet = findViewById(R.id.bottom_sheet);
-        mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+        BottomSheetBehavior mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
         mBottomSheetBehavior.setHideable(true);
         mBottomSheetBehavior.setPeekHeight(300);
-        listView.setAdapter(new ArrayAdapter<String>(this,R.layout.review,test));
+        listView.setAdapter(new ArrayAdapter<>(this,R.layout.review,test));
 
         //Location services
         if (mGoogleApiClient == null) {
@@ -78,7 +76,7 @@ public class MapsActivity extends FragmentActivity implements
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mapHandler = new MapHandler(this, mMap);
+        MapHandler mapHandler = new MapHandler(mMap);
         mMap.setOnMarkerClickListener(mapHandler);
         mMap.setOnCameraIdleListener(mapHandler);
 

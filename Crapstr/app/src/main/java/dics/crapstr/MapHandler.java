@@ -1,7 +1,5 @@
 package dics.crapstr;
 
-import android.content.Context;
-import android.content.Intent;
 import android.location.Location;
 import android.util.Log;
 
@@ -15,8 +13,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Map;
-
 /**
  * Created by daniel on 11/3/2016.
  */
@@ -27,31 +23,21 @@ public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.On
 
     private GoogleMap mMap;
     private LatLng lastLoadedLatLng;
-    private Context context;
 
     // Make sure the default constructor is never used
     private MapHandler() {}
 
-    public MapHandler(Context context, GoogleMap map) {
-        this.context = context;
+    MapHandler(GoogleMap map) {
         this.mMap = map;
     }
 
-    public void setMap(GoogleMap map) {
-        this.mMap = map;
-    }
-
-    public void markLocations(LatLng target) {
-        StringBuilder sb = new StringBuilder(baseURL);
-        sb.append("/location?lat=");
-        sb.append(target.latitude);
-        sb.append("&lon=");
-        sb.append(target.longitude);
+    private void markLocations(LatLng target) {
+        String URL = baseURL + "/location?lat=" + target.latitude + "&lon=" + target.longitude;
         String method = "locations";
-        new JSONHandler(this).execute(sb.toString(),method);
+        new JSONHandler(this).execute(URL,method);
     }
 
-    public void markLocations(JSONArray locations) throws JSONException {
+    void markLocations(JSONArray locations) throws JSONException {
         for (int i=0; i<locations.length(); i++) {
             JSONObject location = locations.getJSONObject(i);
             LatLng position = new LatLng(location.getDouble("lat"), location.getDouble("lon"));
@@ -62,15 +48,13 @@ public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.On
         lastLoadedLatLng = mMap.getCameraPosition().target;
     }
 
-    public void showReviews(String placeId) {
-        StringBuilder sb = new StringBuilder(baseURL);
-        sb.append("/reviews/");
-        sb.append(placeId);
+    private void showReviews(String placeId) {
+        String URL = baseURL + "/reviews" + placeId;
         String method = "reviews";
-        new JSONHandler(this).execute(sb.toString(),method);
+        new JSONHandler(this).execute(URL,method);
     }
 
-    public void showReviews(JSONObject reviews) throws JSONException {
+    void showReviews(JSONObject reviews) throws JSONException {
         double avg = reviews.getDouble("avg");
         Log.d(MapsActivity.LOG_TAG, String.valueOf(avg));
         JSONArray revs = reviews.getJSONArray("reviews");
