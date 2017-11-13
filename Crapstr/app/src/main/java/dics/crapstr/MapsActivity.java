@@ -76,7 +76,7 @@ public class MapsActivity extends FragmentActivity implements
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        MapHandler mapHandler = new MapHandler(mMap);
+        MapHandler mapHandler = new MapHandler(this, mMap);
         mMap.setOnMarkerClickListener(mapHandler);
         mMap.setOnCameraIdleListener(mapHandler);
 
