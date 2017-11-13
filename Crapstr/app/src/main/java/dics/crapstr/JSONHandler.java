@@ -2,14 +2,8 @@ package dics.crapstr;
 
 import android.os.AsyncTask;
 
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,58 +14,37 @@ import java.net.URL;
 
 /**
  * Created by daniel on 11/3/2016.
+ * This class handles communication between the app and the backend
+ *
  */
 
-public class JSONHandler extends AsyncTask<String, Void, String> {
+public class JSONHandler extends AsyncTask<String, Void, Object> {
 
-    private MapHandler mapHandler;
-    private Object JSON;
+    private MapHandler.Callback callback;
 
-    public JSONHandler(MapHandler mapHandler) {
+    JSONHandler(MapHandler.Callback callback) {
         super();
-        this.mapHandler = mapHandler;
+        this.callback = callback;
     }
 
     @Override
     /* params[0] is url
-     * params[1] is method
      */
-    protected String doInBackground(String... params) {
+    protected Object doInBackground(String... params) {
         try {
             String jsonStr = downloadUrl(params[0]);
-            if (jsonStr != null) {
-                switch (params[1]) {
-                    case "locations":
-                        JSON = new JSONArray(jsonStr);
-                        break;
-                    case "reviews":
-                        JSON = new JSONObject(jsonStr);
-                }
-            }
-            return params[1];
+            return new JSONTokener(jsonStr).nextValue();
         } catch (IOException ioe) {
             return "Unable to retrieve web page. URL may be invalid.";
-        } catch (JSONException e) {
-            //TODO: do something with this
+        } catch (JSONException je) {
+            //TODO: something???????
             return "";
         }
     }
 
     @Override
-    protected void onPostExecute(String result) {
-        try {
-            switch (result) {
-                case "locations":
-                    mapHandler.markLocations((JSONArray)JSON);
-                    break;
-                case "reviews":
-                    mapHandler.showReviews((JSONObject)JSON);
-                    break;
-            }
-
-        } catch (JSONException e) {
-            //TODO: do something with this
-        }
+    protected void onPostExecute(Object result) {
+            this.callback.call(result);
     }
 
     private String downloadUrl(String url_S) throws IOException {
@@ -86,7 +59,7 @@ public class JSONHandler extends AsyncTask<String, Void, String> {
             StringBuilder sb = new StringBuilder();
             String line;
             while((line = br.readLine()) != null) {
-                sb.append(line + "\n");
+                sb.append(line).append("\n");
             }
             br.close();
             return sb.toString();

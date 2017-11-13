@@ -15,6 +15,7 @@ import org.json.JSONObject;
 
 /**
  * Created by daniel on 11/3/2016.
+ * Handles all map operations
  */
 
 public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.OnCameraIdleListener {
@@ -24,50 +25,61 @@ public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.On
     private GoogleMap mMap;
     private LatLng lastLoadedLatLng;
 
-    // Make sure the default constructor is never used
-    private MapHandler() {}
-
     MapHandler(GoogleMap map) {
         this.mMap = map;
     }
 
+    public abstract class Callback {
+        public abstract void call(Object o);
+    }
+
     private void markLocations(LatLng target) {
         String URL = baseURL + "/location?lat=" + target.latitude + "&lon=" + target.longitude;
-        String method = "locations";
-        new JSONHandler(this).execute(URL,method);
+        new JSONHandler(new Callback() {
+            @Override
+            public void call(Object o) {
+                JSONArray locations = (JSONArray)o;
+                try {
+                    for (int i = 0; i < locations.length(); i++) {
+                        JSONObject location = locations.getJSONObject(i);
+                        LatLng position = new LatLng(location.getDouble("lat"), location.getDouble("lon"));
+                        mMap.addMarker(new MarkerOptions()
+                                .position(position)
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.graylet))).setTag(location.getString("placeId"));
+                    }
+                    lastLoadedLatLng = mMap.getCameraPosition().target;
+                } catch (JSONException je) {
+                    //TODO
+                }
+            }
+        }).execute(URL);
     }
 
-    void markLocations(JSONArray locations) throws JSONException {
-        for (int i=0; i<locations.length(); i++) {
-            JSONObject location = locations.getJSONObject(i);
-            LatLng position = new LatLng(location.getDouble("lat"), location.getDouble("lon"));
-            mMap.addMarker(new MarkerOptions()
-                    .position(position)
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.graylet))).setTag(location.getString("placeId"));
-        }
-        lastLoadedLatLng = mMap.getCameraPosition().target;
-    }
-
-    private void showReviews(String placeId) {
-        String URL = baseURL + "/reviews" + placeId;
-        String method = "reviews";
-        new JSONHandler(this).execute(URL,method);
-    }
-
-    void showReviews(JSONObject reviews) throws JSONException {
-        double avg = reviews.getDouble("avg");
-        Log.d(MapsActivity.LOG_TAG, String.valueOf(avg));
-        JSONArray revs = reviews.getJSONArray("reviews");
-        for (int i=0; i<revs.length(); i++) {
-            String review = revs.getJSONObject(i).getString("description");
-            int rating = revs.getJSONObject(i).getInt("rating");
-            Log.d(MapsActivity.LOG_TAG, review + " " + rating);
-        }
+    private void showReviews(Marker marker) {
+        String URL = baseURL + "/reviews/" + marker.getTag();
+        new JSONHandler(new Callback() {
+            @Override
+            public void call(Object o) {
+                JSONObject reviews = (JSONObject)o;
+                try {
+                    double avg = reviews.getDouble("avg");
+                    Log.d(MapsActivity.LOG_TAG, String.valueOf(avg));
+                    JSONArray revs = reviews.getJSONArray("reviews");
+                    for (int i = 0; i < revs.length(); i++) {
+                        String review = revs.getJSONObject(i).getString("description");
+                        int rating = revs.getJSONObject(i).getInt("rating");
+                        Log.d(MapsActivity.LOG_TAG, review + " " + rating);
+                    }
+                } catch (JSONException je) {
+                    //TODO
+                }
+            }
+        }).execute(URL);
     }
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        showReviews((String)marker.getTag());
+        showReviews(marker);
         return false;
     }
 
