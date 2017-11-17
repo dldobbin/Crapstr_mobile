@@ -3,7 +3,6 @@ package dics.crapstr;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
@@ -63,17 +62,9 @@ class Location {
         return locations;
     }
 
-    private double reviewToColor() {
-        if (avg < 3) {
-            return (Color.YELLOW-Color.RED)/2*avg + (3*Color.RED-Color.YELLOW)/2;
-        } else {
-            return (Color.GREEN-Color.YELLOW)/2*avg + (-3*Color.GREEN+5*Color.YELLOW)/2;
-        }
-    }
-
     BitmapDescriptor getMarkerIcon(Context context) {
         Drawable icon = ContextCompat.getDrawable(context, R.drawable.toilet);
-        icon.setColorFilter((int)reviewToColor(), PorterDuff.Mode.MULTIPLY);
+        icon.setColorFilter((int)Review.reviewToColor(avg), PorterDuff.Mode.MULTIPLY);
         Canvas canvas = new Canvas();
         Bitmap bitmap = Bitmap.createBitmap(icon.getIntrinsicWidth(), icon.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
         canvas.setBitmap(bitmap);

@@ -23,6 +23,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.ArrayList;
+
 public class MapsActivity extends FragmentActivity implements
         OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
@@ -34,8 +36,7 @@ public class MapsActivity extends FragmentActivity implements
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
-
-    private String[] test = new String[] {"item 1", "item 2", "item 3"};
+    public ReviewsAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +52,8 @@ public class MapsActivity extends FragmentActivity implements
         BottomSheetBehavior mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
         mBottomSheetBehavior.setHideable(true);
         mBottomSheetBehavior.setPeekHeight(300);
-        listView.setAdapter(new ArrayAdapter<>(this,R.layout.review,test));
+        adapter = new ReviewsAdapter(this,new ArrayList<Review>());
+        listView.setAdapter(adapter);
 
         //Location services
         if (mGoogleApiClient == null) {

@@ -58,14 +58,8 @@ public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.On
             @Override
             public void call(Object o) {
                 Reviews reviews = new Reviews((JSONObject)o);
-                StringBuilder sb = new StringBuilder();
-                sb.append(String.valueOf(reviews.getAverage())).append("\n");
-                for (Review review : reviews.getReviews()) {
-                    sb.append(review.getDescription()).append(" ").append(review.getRating()).append("\n");
-                }
-                marker.setSnippet(sb.toString());
-                marker.setTitle("TEST");
-                marker.showInfoWindow();
+                ((MapsActivity)context).adapter.clear();
+                ((MapsActivity)context).adapter.addAll(reviews.getReviews());
             }
         }).execute(URL);
     }
