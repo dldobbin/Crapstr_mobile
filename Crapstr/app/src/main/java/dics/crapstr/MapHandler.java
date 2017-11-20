@@ -1,7 +1,9 @@
 package dics.crapstr;
 
-import android.content.Context;
+import android.support.design.widget.BottomSheetBehavior;
 import android.util.Log;
+import android.view.View;
+import android.widget.ListView;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
@@ -23,12 +25,17 @@ public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.On
     private static final String baseURL = "http://crapstr-backend.herokuapp.com";
 
     private GoogleMap mMap;
-    private Context context;
     private LatLng lastLoadedLatLng;
+    private ReviewsAdapter adapter;
+    private BottomSheetBehavior mBottomSheetBehavior;
 
-    MapHandler(Context context, GoogleMap map) {
+    MapHandler(GoogleMap map, ReviewsAdapter adapter, View bottomSheet) {
         this.mMap = map;
-        this.context = context;
+        this.adapter = adapter;
+        this.mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+        this.mBottomSheetBehavior.setHideable(true);
+        this.mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        ((ListView)bottomSheet.findViewById(R.id.list)).setAdapter(this.adapter);
     }
 
     public abstract class Callback {
@@ -45,7 +52,7 @@ public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.On
                     LatLng position = new LatLng(location.getLat(), location.getLon());
                     mMap.addMarker(new MarkerOptions()
                             .position(position)
-                            .icon(location.getMarkerIcon(context))).setTag(location.getPlaceId());
+                            .icon(Utility.getInstance().getMarkerIcon(location.getAvg()))).setTag(location.getPlaceId());
                 }
                 lastLoadedLatLng = mMap.getCameraPosition().target;
             }
@@ -58,8 +65,9 @@ public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.On
             @Override
             public void call(Object o) {
                 Reviews reviews = new Reviews((JSONObject)o);
-                ((MapsActivity)context).adapter.clear();
-                ((MapsActivity)context).adapter.addAll(reviews.getReviews());
+                adapter.clear();
+                adapter.addAll(reviews.getReviews());
+                mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
             }
         }).execute(URL);
     }

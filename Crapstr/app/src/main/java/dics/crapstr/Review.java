@@ -1,7 +1,5 @@
 package dics.crapstr;
 
-import android.graphics.Color;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,13 +42,5 @@ class Review {
             }
         }
         return reviews;
-    }
-
-    static double reviewToColor(double rating) {
-        if (rating < 3) {
-            return (Color.YELLOW-Color.RED)/2*rating + (3*Color.RED-Color.YELLOW)/2;
-        } else {
-            return (Color.GREEN-Color.YELLOW)/2*rating + (-3*Color.GREEN+5*Color.YELLOW)/2;
-        }
     }
 }

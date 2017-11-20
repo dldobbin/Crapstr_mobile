@@ -6,13 +6,9 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -36,7 +32,6 @@ public class MapsActivity extends FragmentActivity implements
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
-    public ReviewsAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,14 +42,6 @@ public class MapsActivity extends FragmentActivity implements
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        ListView listView = (ListView)findViewById(R.id.list);
-        View bottomSheet = findViewById(R.id.bottom_sheet);
-        BottomSheetBehavior mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
-        mBottomSheetBehavior.setHideable(true);
-        mBottomSheetBehavior.setPeekHeight(300);
-        adapter = new ReviewsAdapter(this,new ArrayList<Review>());
-        listView.setAdapter(adapter);
-
         //Location services
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -63,6 +50,7 @@ public class MapsActivity extends FragmentActivity implements
                     .addApi(LocationServices.API)
                     .build();
         }
+        Utility.getInstance().setIcon(ContextCompat.getDrawable(this, R.drawable.toilet));
     }
 
 
@@ -78,7 +66,7 @@ public class MapsActivity extends FragmentActivity implements
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        MapHandler mapHandler = new MapHandler(this, mMap);
+        MapHandler mapHandler = new MapHandler(mMap, new ReviewsAdapter(this, new ArrayList<Review>()), findViewById(R.id.bottom_sheet));
         mMap.setOnMarkerClickListener(mapHandler);
         mMap.setOnCameraIdleListener(mapHandler);
 

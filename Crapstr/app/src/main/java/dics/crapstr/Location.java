@@ -1,15 +1,5 @@
 package dics.crapstr;
 
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
-import android.support.v4.content.ContextCompat;
-
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,7 +24,7 @@ class Location {
         this.placeId = placeId;
     }*/
 
-    //public double getAvg() { return avg; }
+    double getAvg() { return avg; }
     double getLat() { return lat; }
     double getLon() { return lon; }
     String getPlaceId() { return placeId; }
@@ -60,16 +50,5 @@ class Location {
             //TODO
         }
         return locations;
-    }
-
-    BitmapDescriptor getMarkerIcon(Context context) {
-        Drawable icon = ContextCompat.getDrawable(context, R.drawable.toilet);
-        icon.setColorFilter((int)Review.reviewToColor(avg), PorterDuff.Mode.MULTIPLY);
-        Canvas canvas = new Canvas();
-        Bitmap bitmap = Bitmap.createBitmap(icon.getIntrinsicWidth(), icon.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        canvas.setBitmap(bitmap);
-        icon.setBounds(0,0,icon.getIntrinsicWidth(),icon.getIntrinsicHeight());
-        icon.draw(canvas);
-        return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 }
