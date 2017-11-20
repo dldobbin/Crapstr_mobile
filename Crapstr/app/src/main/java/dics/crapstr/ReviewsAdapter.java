@@ -29,8 +29,8 @@ public class ReviewsAdapter extends ArrayAdapter<Review> {
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.review, parent, false);
         }
-        ImageView rating = (ImageView)convertView.findViewById(R.id.rating);
-        TextView description = (TextView)convertView.findViewById(R.id.description);
+        ImageView rating = convertView.findViewById(R.id.rating);
+        TextView description = convertView.findViewById(R.id.description);
         if (review != null) {
             int padding = (review.getRating() + 2) * getContext().getResources().getDimensionPixelSize(R.dimen.rating_padding_interval);
             rating.setPadding(padding, 0, 0, 0);

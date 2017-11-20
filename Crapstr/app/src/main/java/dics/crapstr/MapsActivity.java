@@ -5,33 +5,30 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
 
 public class MapsActivity extends FragmentActivity implements
         OnMapReadyCallback,
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener,
         ActivityCompat.OnRequestPermissionsResultCallback {
 
     public static final String LOG_TAG = "Crapstr";
     private static final int LOCATION_REQUEST_CODE = 0;
 
     private GoogleMap mMap;
-    private GoogleApiClient mGoogleApiClient;
+    private FusedLocationProviderClient fusedLocationProviderClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,13 +40,7 @@ public class MapsActivity extends FragmentActivity implements
         mapFragment.getMapAsync(this);
 
         //Location services
-        if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
-        }
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         Utility.getInstance().setIcon(ContextCompat.getDrawable(this, R.drawable.toilet));
     }
 
@@ -70,13 +61,7 @@ public class MapsActivity extends FragmentActivity implements
         mMap.setOnMarkerClickListener(mapHandler);
         mMap.setOnCameraIdleListener(mapHandler);
 
-        mGoogleApiClient.connect();
-    }
-
-    @Override
-    protected void onStop() {
-        mGoogleApiClient.disconnect();
-        super.onStop();
+        setMapLocation();
     }
 
     @Override
@@ -86,41 +71,26 @@ public class MapsActivity extends FragmentActivity implements
             if (permissions.length == 1
                     && permissions[0].equals(Manifest.permission.ACCESS_FINE_LOCATION)
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                            mGoogleApiClient);
-                    if (mLastLocation != null) {
-                        latLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-                    }
-                }
+                setMapLocation();
             }
             mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         }
     }
 
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
+    private void setMapLocation() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                    mGoogleApiClient);
-            if (mLastLocation != null) {
-                LatLng latLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-            }
+            fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    LatLng latLng = new LatLng(41.8762686, -87.6322661);
+                    if (location != null) {
+                        latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                    }
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                }
+            });
         } else {
             ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE);
         }
     }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        LatLng latLng = new LatLng(41.8762686, -87.6322661);
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-    }
-
 }
