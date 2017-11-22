@@ -1,5 +1,6 @@
 package dics.crapstr;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -16,12 +17,14 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
 class Utility {
     private Drawable icon;
+    private Resources res;
     private static final Utility instance = new Utility();
 
     private Utility(){}
 
     static Utility getInstance() { return instance; }
     void setIcon(Drawable drawable) { instance.icon = drawable; }
+    void setRes(Resources res) { instance.res = res; }
 
     BitmapDescriptor getMarkerIcon(double avg) {
         icon.setColorFilter(reviewToColor(avg), PorterDuff.Mode.MULTIPLY);
@@ -41,5 +44,11 @@ class Utility {
         float green = hsv[0];
         float hue = red + (green-red)*((float)rating-1)/(5-1);
         return Color.HSVToColor(new float[]{hue,1,1});
+    }
+
+    int getPadding(double rating) {
+        double wholePart = Math.floor(rating);
+        double remainder = rating - wholePart;
+        return (int)((wholePart + 2) * res.getDimensionPixelSize(R.dimen.rating_padding_interval) + (remainder > 0 ? res.getDimensionPixelSize(R.dimen.rating_remainder_padding_interval) : 0));
     }
 }

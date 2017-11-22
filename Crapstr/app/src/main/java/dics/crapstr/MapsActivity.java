@@ -47,6 +47,7 @@ public class MapsActivity extends FragmentActivity implements
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         geoDataClient = Places.getGeoDataClient(this, null);
         Utility.getInstance().setIcon(ContextCompat.getDrawable(this, R.drawable.toilet));
+        Utility.getInstance().setRes(getResources());
     }
 
 

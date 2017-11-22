@@ -1,9 +1,11 @@
 package dics.crapstr;
 
+import android.graphics.PorterDuff;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -95,6 +97,10 @@ public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.On
                     @Override
                     public void onSuccess(@NonNull PlaceBufferResponse places) {
                         ((TextView)bottomSheet.findViewById(R.id.place_name)).setText(places.get(0).getName());
+                        int padding = Utility.getInstance().getPadding(reviews.getAverage());
+                        ImageView avgRatingView = bottomSheet.findViewById(R.id.rating);
+                        avgRatingView.setPadding(padding, 0, 0, 0);
+                        avgRatingView.setColorFilter(Utility.getInstance().reviewToColor(reviews.getAverage()), PorterDuff.Mode.MULTIPLY);
                         adapter.clear();
                         adapter.addAll(reviews.getReviews());
                         BottomSheetBehavior.from(bottomSheet).setState(BottomSheetBehavior.STATE_EXPANDED);
