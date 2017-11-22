@@ -11,6 +11,7 @@ import java.util.ArrayList;
  */
 
 class Reviews {
+    private String placeId;
     private double average;
     private ArrayList<Review> reviews;
 
@@ -19,11 +20,13 @@ class Reviews {
         this.reviews = reviews;
     }*/
 
+    String getPlaceId() { return placeId; }
     double getAverage() { return average; }
     ArrayList<Review> getReviews() { return reviews; }
 
     Reviews(JSONObject object) {
         try {
+            this.placeId = object.getString("placeId");
             this.average = object.getDouble("avg");
             this.reviews = Review.fromJson(object.getJSONArray("reviews"));
         } catch (JSONException je) {

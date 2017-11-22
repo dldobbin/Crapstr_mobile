@@ -11,6 +11,9 @@ import android.support.v4.content.ContextCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.GeoDataClient;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -29,6 +32,7 @@ public class MapsActivity extends FragmentActivity implements
 
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationProviderClient;
+    private GeoDataClient geoDataClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +45,7 @@ public class MapsActivity extends FragmentActivity implements
 
         //Location services
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        geoDataClient = Places.getGeoDataClient(this, null);
         Utility.getInstance().setIcon(ContextCompat.getDrawable(this, R.drawable.toilet));
     }
 
@@ -57,9 +62,12 @@ public class MapsActivity extends FragmentActivity implements
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        MapHandler mapHandler = new MapHandler(mMap, new ReviewsAdapter(this, new ArrayList<Review>()), findViewById(R.id.bottom_sheet));
+        MapHandler mapHandler = new MapHandler(mMap, new ReviewsAdapter(this, new ArrayList<Review>()), findViewById(R.id.bottom_sheet), geoDataClient);
         mMap.setOnMarkerClickListener(mapHandler);
         mMap.setOnCameraIdleListener(mapHandler);
+
+        PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment)getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
+        autocompleteFragment.setOnPlaceSelectedListener(mapHandler);
 
         setMapLocation();
     }
@@ -67,13 +75,11 @@ public class MapsActivity extends FragmentActivity implements
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == LOCATION_REQUEST_CODE) {
-            LatLng latLng = new LatLng(41.8762686, -87.6322661);
             if (permissions.length == 1
                     && permissions[0].equals(Manifest.permission.ACCESS_FINE_LOCATION)
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 setMapLocation();
             }
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         }
     }
 
@@ -81,12 +87,8 @@ public class MapsActivity extends FragmentActivity implements
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
                 @Override
-                public void onSuccess(Location location) {
-                    LatLng latLng = new LatLng(41.8762686, -87.6322661);
-                    if (location != null) {
-                        latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                    }
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                public void onSuccess(@NonNull Location location) {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
                 }
             });
         } else {

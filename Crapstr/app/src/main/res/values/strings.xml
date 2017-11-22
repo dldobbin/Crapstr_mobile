@@ -2,4 +2,5 @@
     <string name="app_name">Crapstr</string>
     <string name="title_activity_maps">Crapstr</string>
     <string name="title_activity_show_reviews">ShowReviewsActivity</string>
+    <string name="add_button">+</string>
 </resources>

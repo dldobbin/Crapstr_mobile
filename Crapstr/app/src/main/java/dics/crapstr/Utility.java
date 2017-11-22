@@ -34,10 +34,17 @@ class Utility {
     }
 
     int reviewToColor(double rating) {
-        if (rating < 3) {
+        float[] hsv = new float[3];
+        Color.RGBToHSV(255,0,0, hsv);
+        float red = hsv[0];
+        Color.RGBToHSV(0,255,0, hsv);
+        float green = hsv[0];
+        float hue = red + (green-red)*((float)rating-1)/(5-1);
+        return Color.HSVToColor(new float[]{hue,1,1});
+        /*if (rating < 3) {
             return (int)((Color.YELLOW-Color.RED)/2*rating + (3*Color.RED-Color.YELLOW)/2);
         } else {
             return (int)((Color.GREEN-Color.YELLOW)/2*rating + (-3*Color.GREEN+5*Color.YELLOW)/2);
-        }
+        }*/
     }
 }

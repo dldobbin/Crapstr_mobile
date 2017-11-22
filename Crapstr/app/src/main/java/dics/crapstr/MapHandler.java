@@ -1,14 +1,23 @@
 package dics.crapstr;
 
+import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.TextView;
 
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.GeoDataClient;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceBufferResponse;
+import com.google.android.gms.location.places.ui.PlaceSelectionListener;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -20,21 +29,38 @@ import java.util.ArrayList;
  * Handles all map operations
  */
 
-public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.OnCameraIdleListener {
+public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.OnCameraIdleListener, PlaceSelectionListener {
 
     private static final String baseURL = "http://crapstr-backend.herokuapp.com";
 
     private GoogleMap mMap;
     private LatLng lastLoadedLatLng;
     private ReviewsAdapter adapter;
-    private BottomSheetBehavior mBottomSheetBehavior;
+    private View bottomSheet;
+    private GeoDataClient geoDataClient;
 
-    MapHandler(GoogleMap map, ReviewsAdapter adapter, View bottomSheet) {
+    MapHandler(GoogleMap map, ReviewsAdapter adapter, View bottomSheet, GeoDataClient geoDataClient) {
         this.mMap = map;
         this.adapter = adapter;
-        this.mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
-        this.mBottomSheetBehavior.setHideable(true);
-        this.mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        this.bottomSheet = bottomSheet;
+        this.geoDataClient = geoDataClient;
+
+        //Make clicks to bottom sheet do nothing so they don't propagate to the search bar
+        bottomSheet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {}
+        });
+
+        bottomSheet.findViewById(R.id.add_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.i(MapsActivity.LOG_TAG, ((ButtonWrapper)view).getPlaceId());
+            }
+        });
+        BottomSheetBehavior mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+        mBottomSheetBehavior.setHideable(true);
+        mBottomSheetBehavior.setPeekHeight(0);
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
         ((ListView)bottomSheet.findViewById(R.id.list)).setAdapter(this.adapter);
     }
 
@@ -64,10 +90,17 @@ public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.On
         new JSONHandler(new Callback() {
             @Override
             public void call(Object o) {
-                Reviews reviews = new Reviews((JSONObject)o);
-                adapter.clear();
-                adapter.addAll(reviews.getReviews());
-                mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                final Reviews reviews = new Reviews((JSONObject)o);
+                geoDataClient.getPlaceById(reviews.getPlaceId()).addOnSuccessListener(new OnSuccessListener<PlaceBufferResponse>() {
+                    @Override
+                    public void onSuccess(@NonNull PlaceBufferResponse places) {
+                        ((TextView)bottomSheet.findViewById(R.id.place_name)).setText(places.get(0).getName());
+                        adapter.clear();
+                        adapter.addAll(reviews.getReviews());
+                        BottomSheetBehavior.from(bottomSheet).setState(BottomSheetBehavior.STATE_EXPANDED);
+                        ((ButtonWrapper)bottomSheet.findViewById(R.id.add_button)).setPlaceId(places.get(0).getId());
+                    }
+                });
             }
         }).execute(URL);
     }
@@ -89,8 +122,17 @@ public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.On
                 mMap.clear();
                 markLocations(mMap.getCameraPosition().target);
             }
-            Log.d(MapsActivity.LOG_TAG, "onCameraIdle");
-            Log.d(MapsActivity.LOG_TAG, String.valueOf(distance[0]));
         }
+    }
+
+    @Override
+    public void onPlaceSelected(Place place) {
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(place.getLatLng()));
+    }
+
+    @Override
+    public void onError(Status status) {
+        // TODO
+        Log.i(MapsActivity.LOG_TAG, "An error occurred: " + status);
     }
 }
