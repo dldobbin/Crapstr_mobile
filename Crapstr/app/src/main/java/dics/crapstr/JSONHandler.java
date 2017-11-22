@@ -29,10 +29,11 @@ public class JSONHandler extends AsyncTask<String, Void, Object> {
 
     @Override
     /* params[0] is url
+     * params[1] is method
      */
     protected Object doInBackground(String... params) {
         try {
-            String jsonStr = downloadUrl(params[0]);
+            String jsonStr = downloadUrl(params[0], params[1]);
             return new JSONTokener(jsonStr).nextValue();
         } catch (IOException ioe) {
             return "Unable to retrieve web page. URL may be invalid.";
@@ -47,12 +48,13 @@ public class JSONHandler extends AsyncTask<String, Void, Object> {
             this.callback.call(result);
     }
 
-    private String downloadUrl(String url_S) throws IOException {
+    private String downloadUrl(String url_S, String method) throws IOException {
         InputStream is = null;
 
         try {
             URL url = new URL(url_S);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod(method);
             conn.connect();
             is = conn.getInputStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));

@@ -82,7 +82,7 @@ public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.On
                 }
                 lastLoadedLatLng = mMap.getCameraPosition().target;
             }
-        }).execute(URL);
+        }).execute(URL, "GET");
     }
 
     private void showReviews(final Marker marker) {
@@ -102,7 +102,7 @@ public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.On
                     }
                 });
             }
-        }).execute(URL);
+        }).execute(URL, "GET");
     }
 
     @Override
