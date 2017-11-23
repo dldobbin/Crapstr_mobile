@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -55,6 +56,13 @@ public class JSONHandler extends AsyncTask<String, Void, Object> {
             URL url = new URL(url_S);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod(method);
+            if (method.equals("POST")) {
+                conn.setDoOutput(true);
+                OutputStream os = conn.getOutputStream();
+                os.write("ball".getBytes());
+                os.flush();
+                os.close();
+            }
             conn.connect();
             is = conn.getInputStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));

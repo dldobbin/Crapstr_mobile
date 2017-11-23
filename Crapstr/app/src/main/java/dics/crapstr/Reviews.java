@@ -3,6 +3,7 @@ package dics.crapstr;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -10,15 +11,15 @@ import java.util.ArrayList;
  *
  */
 
-class Reviews {
+class Reviews implements Serializable {
     private String placeId;
     private double average;
     private ArrayList<Review> reviews;
 
-    /*public Reviews(double average, ArrayList<Review> reviews) {
-        this.average = average;
-        this.reviews = reviews;
-    }*/
+    public Reviews(String placeId) {
+        this.placeId = placeId;
+        this.reviews = new ArrayList<>();
+    }
 
     String getPlaceId() { return placeId; }
     double getAverage() { return average; }

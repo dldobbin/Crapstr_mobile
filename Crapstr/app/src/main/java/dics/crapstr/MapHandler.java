@@ -52,13 +52,6 @@ public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.On
             @Override
             public void onClick(View view) {}
         });
-
-        bottomSheet.findViewById(R.id.add_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.i(MapsActivity.LOG_TAG, ((ButtonWrapper)view).getPlaceId());
-            }
-        });
         BottomSheetBehavior mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
         mBottomSheetBehavior.setHideable(true);
         mBottomSheetBehavior.setPeekHeight(0);

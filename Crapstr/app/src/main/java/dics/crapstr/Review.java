@@ -4,6 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -11,17 +12,19 @@ import java.util.ArrayList;
  *
  */
 
-class Review {
+class Review implements Serializable {
     private int rating;
     private String description;
 
-    /*public Review(int rating, String description) {
+    public Review(int rating, String description) {
         this.rating = rating;
         this.description = description;
-    }*/
+    }
 
     int getRating() { return rating; }
+    void setRating(int rating) { this.rating = rating; }
     String getDescription() { return description; }
+    void setDescription(String description) { this.description = description; }
 
     private Review(JSONObject object) {
         try {

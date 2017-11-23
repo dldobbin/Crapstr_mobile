@@ -1,6 +1,7 @@
 package dics.crapstr;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -8,6 +9,8 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
+import android.view.View;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -29,6 +32,7 @@ public class MapsActivity extends FragmentActivity implements
 
     public static final String LOG_TAG = "Crapstr";
     private static final int LOCATION_REQUEST_CODE = 0;
+    private static final int REVIEW_ADD_CODE = 1;
 
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -70,6 +74,15 @@ public class MapsActivity extends FragmentActivity implements
         PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment)getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
         autocompleteFragment.setOnPlaceSelectedListener(mapHandler);
 
+        findViewById(R.id.add_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MapsActivity.this, AddReviewActivity.class);
+                intent.putExtra("placeId", ((ButtonWrapper)view).getPlaceId());
+                startActivityForResult(intent, REVIEW_ADD_CODE);
+            }
+        });
+
         setMapLocation();
     }
 
@@ -82,6 +95,19 @@ public class MapsActivity extends FragmentActivity implements
                 setMapLocation();
             }
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REVIEW_ADD_CODE) {
+            if (resultCode == RESULT_OK) {
+                Reviews reviews = (Reviews)data.getSerializableExtra("reviews");
+                Log.i(LOG_TAG, reviews.getPlaceId());
+                Log.i(LOG_TAG, String.valueOf(reviews.getReviews().get(0).getRating()));
+                Log.i(LOG_TAG, reviews.getReviews().get(0).getDescription());
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     private void setMapLocation() {
