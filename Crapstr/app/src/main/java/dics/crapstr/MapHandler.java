@@ -33,7 +33,7 @@ import java.util.ArrayList;
 
 public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.OnCameraIdleListener, PlaceSelectionListener {
 
-    private static final String baseURL = "http://crapstr-backend.herokuapp.com";
+
 
     private GoogleMap mMap;
     private LatLng lastLoadedLatLng;
@@ -59,13 +59,9 @@ public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.On
         ((ListView)bottomSheet.findViewById(R.id.list)).setAdapter(this.adapter);
     }
 
-    public abstract class Callback {
-        public abstract void call(Object o);
-    }
-
     private void markLocations(LatLng target) {
-        String URL = baseURL + "/location?lat=" + target.latitude + "&lon=" + target.longitude;
-        new JSONHandler(new Callback() {
+        String URL = Utility.baseURL + "/location?lat=" + target.latitude + "&lon=" + target.longitude;
+        new JSONHandler(new JSONHandler.Callback() {
             @Override
             public void call(Object o) {
                 ArrayList<Location> locations = Location.fromJson((JSONArray)o);
@@ -81,8 +77,8 @@ public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.On
     }
 
     private void showReviews(final Marker marker) {
-        String URL = baseURL + "/reviews/" + marker.getTag();
-        new JSONHandler(new Callback() {
+        String URL = Utility.baseURL + "/reviews/" + marker.getTag();
+        new JSONHandler(new JSONHandler.Callback() {
             @Override
             public void call(Object o) {
                 final Reviews reviews = new Reviews((JSONObject)o);

@@ -21,9 +21,13 @@ import java.net.URL;
 
 public class JSONHandler extends AsyncTask<String, Void, Object> {
 
-    private MapHandler.Callback callback;
+    public abstract static class Callback {
+        public abstract void call(Object o);
+    }
 
-    JSONHandler(MapHandler.Callback callback) {
+    private Callback callback;
+
+    JSONHandler(Callback callback) {
         super();
         this.callback = callback;
     }
@@ -31,10 +35,11 @@ public class JSONHandler extends AsyncTask<String, Void, Object> {
     @Override
     /* params[0] is url
      * params[1] is method
+     * params[2] is data
      */
     protected Object doInBackground(String... params) {
         try {
-            String jsonStr = downloadUrl(params[0], params[1]);
+            String jsonStr = downloadUrl(params[0], params[1], params.length > 2 ? params[2] : "");
             return new JSONTokener(jsonStr).nextValue();
         } catch (IOException ioe) {
             return "Unable to retrieve web page. URL may be invalid.";
@@ -49,7 +54,7 @@ public class JSONHandler extends AsyncTask<String, Void, Object> {
             this.callback.call(result);
     }
 
-    private String downloadUrl(String url_S, String method) throws IOException {
+    private String downloadUrl(String url_S, String method, String data) throws IOException {
         InputStream is = null;
 
         try {
@@ -59,7 +64,7 @@ public class JSONHandler extends AsyncTask<String, Void, Object> {
             if (method.equals("POST")) {
                 conn.setDoOutput(true);
                 OutputStream os = conn.getOutputStream();
-                os.write("ball".getBytes());
+                os.write(data.getBytes());
                 os.flush();
                 os.close();
             }

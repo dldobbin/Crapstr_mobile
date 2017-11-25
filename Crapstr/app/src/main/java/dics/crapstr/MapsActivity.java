@@ -102,9 +102,13 @@ public class MapsActivity extends FragmentActivity implements
         if (requestCode == REVIEW_ADD_CODE) {
             if (resultCode == RESULT_OK) {
                 Reviews reviews = (Reviews)data.getSerializableExtra("reviews");
-                Log.i(LOG_TAG, reviews.getPlaceId());
-                Log.i(LOG_TAG, String.valueOf(reviews.getReviews().get(0).getRating()));
-                Log.i(LOG_TAG, reviews.getReviews().get(0).getDescription());
+                Log.i(LOG_TAG, Utility.getInstance().prepForPost(reviews));
+                new JSONHandler(new JSONHandler.Callback() {
+                    @Override
+                    public void call(Object o) {
+
+                    }
+                }).execute(Utility.baseURL + "/reviews", "POST", Utility.getInstance().prepForPost(reviews));
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
