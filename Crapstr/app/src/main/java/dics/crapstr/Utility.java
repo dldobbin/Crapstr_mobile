@@ -56,10 +56,10 @@ class Utility {
 
     String prepForPost(Reviews reviews) {
         Review review = reviews.getReviews().get(0);
-        return "placeId=" + reviews.getPlaceId() + ";rating=" + review.getRating() + ";description=" + review.getDescription();
+        return "placeId=" + reviews.getPlaceId() + "&rating=" + review.getRating() + "&description=" + review.getDescription();
     }
 
     String prepForPost(Location location, Reviews reviews) {
-        return prepForPost(reviews) + ";lon=" + location.getLon() + ";lat=" + location.getLat();
+        return prepForPost(reviews) + "&lon=" + location.getLon() + "&lat=" + location.getLat();
     }
 }
