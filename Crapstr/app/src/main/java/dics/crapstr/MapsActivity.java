@@ -35,6 +35,7 @@ public class MapsActivity extends FragmentActivity implements
     private static final int REVIEW_ADD_CODE = 1;
 
     private GoogleMap mMap;
+    private MapHandler mapHandler;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private GeoDataClient geoDataClient;
 
@@ -67,7 +68,7 @@ public class MapsActivity extends FragmentActivity implements
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        MapHandler mapHandler = new MapHandler(mMap, new ReviewsAdapter(this, new ArrayList<Review>()), findViewById(R.id.bottom_sheet), geoDataClient);
+        mapHandler = new MapHandler(mMap, new ReviewsAdapter(this, new ArrayList<Review>()), findViewById(R.id.bottom_sheet), geoDataClient);
         mMap.setOnMarkerClickListener(mapHandler);
         mMap.setOnCameraIdleListener(mapHandler);
 
@@ -101,12 +102,12 @@ public class MapsActivity extends FragmentActivity implements
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REVIEW_ADD_CODE) {
             if (resultCode == RESULT_OK) {
-                Reviews reviews = (Reviews)data.getSerializableExtra("reviews");
-                Log.i(LOG_TAG, Utility.getInstance().prepForPost(reviews));
+                final Reviews reviews = (Reviews)data.getSerializableExtra("reviews");
                 new JSONHandler(new JSONHandler.Callback() {
                     @Override
                     public void call(Object o) {
-
+                        mapHandler.markLocations(mMap.getCameraPosition().target);
+                        mapHandler.showReviews(reviews.getPlaceId());
                     }
                 }).execute(Utility.baseURL + "/reviews", "POST", Utility.getInstance().prepForPost(reviews));
             }

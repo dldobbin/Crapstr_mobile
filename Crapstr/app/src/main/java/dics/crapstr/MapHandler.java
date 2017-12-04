@@ -59,7 +59,7 @@ public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.On
         ((ListView)bottomSheet.findViewById(R.id.list)).setAdapter(this.adapter);
     }
 
-    private void markLocations(LatLng target) {
+    void markLocations(LatLng target) {
         String URL = Utility.baseURL + "/location?lat=" + target.latitude + "&lon=" + target.longitude;
         new JSONHandler(new JSONHandler.Callback() {
             @Override
@@ -76,8 +76,8 @@ public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.On
         }).execute(URL, "GET");
     }
 
-    private void showReviews(final Marker marker) {
-        String URL = Utility.baseURL + "/reviews/" + marker.getTag();
+    void showReviews(final String placeId) {
+        String URL = Utility.baseURL + "/reviews/" + placeId;
         new JSONHandler(new JSONHandler.Callback() {
             @Override
             public void call(Object o) {
@@ -102,7 +102,7 @@ public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.On
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        showReviews(marker);
+        showReviews((String)marker.getTag());
         return false;
     }
 
@@ -122,7 +122,10 @@ public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.On
 
     @Override
     public void onPlaceSelected(Place place) {
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(place.getLatLng()));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 15));
+        /*mMap.addMarker(new MarkerOptions()
+                .position(place.getLatLng())
+                .icon(Utility.getInstance().getMarkerIcon(0))).setTag(place.getId());*/
     }
 
     @Override
