@@ -9,7 +9,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.View;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -79,7 +78,7 @@ public class MapsActivity extends FragmentActivity implements
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MapsActivity.this, AddReviewActivity.class);
-                intent.putExtra("placeId", ((ButtonWrapper)view).getPlaceId());
+                intent.putExtra("outgoing", ((ButtonWrapper)view).getOutgoing());
                 startActivityForResult(intent, REVIEW_ADD_CODE);
             }
         });
@@ -102,14 +101,14 @@ public class MapsActivity extends FragmentActivity implements
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REVIEW_ADD_CODE) {
             if (resultCode == RESULT_OK) {
-                final Reviews reviews = (Reviews)data.getSerializableExtra("reviews");
+                final Outgoing outgoing = (Outgoing)data.getSerializableExtra("outgoing");
                 new JSONHandler(new JSONHandler.Callback() {
                     @Override
                     public void call(Object o) {
-                        mapHandler.markLocations(mMap.getCameraPosition().target);
-                        mapHandler.showReviews(reviews.getPlaceId());
+                        mapHandler.markLocations(outgoing.getLatLng());
+                        mapHandler.showReviews(outgoing.getPlaceId());
                     }
-                }).execute(Utility.baseURL + "/reviews", "POST", Utility.getInstance().prepForPost(reviews));
+                }).execute(Utility.baseURL + outgoing.getURL(), "POST", outgoing.prepForPost());
             }
         }
         super.onActivityResult(requestCode, resultCode, data);

@@ -65,15 +65,22 @@ public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.On
             @Override
             public void call(Object o) {
                 ArrayList<Location> locations = Location.fromJson((JSONArray)o);
-                for (Location location : locations) {
-                    LatLng position = new LatLng(location.getLat(), location.getLon());
+                for (final Location location : locations) {
+                    final LatLng position = new LatLng(location.getLat(), location.getLon());
+                    final Outgoing outgoing = new Outgoing("/reviews", location.getPlaceId(), position);
                     mMap.addMarker(new MarkerOptions()
                             .position(position)
-                            .icon(Utility.getInstance().getMarkerIcon(location.getAvg()))).setTag(location.getPlaceId());
+                            .icon(Utility.getInstance().getMarkerIcon(location.getAvg()))).setTag(outgoing);
                 }
                 lastLoadedLatLng = mMap.getCameraPosition().target;
             }
         }).execute(URL, "GET");
+    }
+
+    private void showReviews(final Outgoing outgoing) {
+        showReviews(outgoing.getPlaceId());
+        ButtonWrapper buttonWrapper = bottomSheet.findViewById(R.id.add_button);
+        buttonWrapper.setOutgoing(outgoing);
     }
 
     void showReviews(final String placeId) {
@@ -93,7 +100,6 @@ public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.On
                         adapter.clear();
                         adapter.addAll(reviews.getReviews());
                         BottomSheetBehavior.from(bottomSheet).setState(BottomSheetBehavior.STATE_EXPANDED);
-                        ((ButtonWrapper)bottomSheet.findViewById(R.id.add_button)).setPlaceId(places.get(0).getId());
                     }
                 });
             }
@@ -102,7 +108,7 @@ public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.On
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        showReviews((String)marker.getTag());
+        showReviews((Outgoing)marker.getTag());
         return false;
     }
 
@@ -121,11 +127,22 @@ public class MapHandler implements GoogleMap.OnMarkerClickListener, GoogleMap.On
     }
 
     @Override
-    public void onPlaceSelected(Place place) {
+    public void onPlaceSelected(final Place place) {
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 15));
-        /*mMap.addMarker(new MarkerOptions()
-                .position(place.getLatLng())
-                .icon(Utility.getInstance().getMarkerIcon(0))).setTag(place.getId());*/
+        String URL = Utility.baseURL + "/reviews/" + place.getId();
+        new JSONHandler(new JSONHandler.Callback() {
+            @Override
+            public void call(Object o) {
+                Reviews reviews = new Reviews((JSONObject)o);
+                if (reviews.getReviews().size() == 0) {
+                    Outgoing outgoing = new Outgoing("/location", place.getId(), place.getLatLng());
+                    mMap.addMarker(new MarkerOptions()
+                            .position(place.getLatLng())
+                            .icon(Utility.getInstance().getMarkerIcon(0))).setTag(outgoing);
+                }
+            }
+        }).execute(URL, "GET");
+        /**/
     }
 
     @Override

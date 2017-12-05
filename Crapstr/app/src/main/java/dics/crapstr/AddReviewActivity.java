@@ -9,15 +9,14 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 public class AddReviewActivity extends Activity {
-    private Reviews reviews;
+    private Outgoing outgoing;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_review);
 
-        reviews = new Reviews(getIntent().getStringExtra("placeId"));
-        reviews.getReviews().add(new Review(1, ""));
+        outgoing = (Outgoing)getIntent().getSerializableExtra("outgoing");
 
         setRating(1);
         findViewById(R.id.review_1).setOnClickListener(new View.OnClickListener() {
@@ -44,9 +43,9 @@ public class AddReviewActivity extends Activity {
             @Override
             public void onClick(View view) {
                 EditText editText = findViewById(R.id.review_description);
-                reviews.getReviews().get(0).setDescription(editText.getText().toString());
+                outgoing.setDescription(editText.getText().toString());
                 Intent i = new Intent();
-                i.putExtra("reviews",reviews);
+                i.putExtra("outgoing",outgoing);
                 AddReviewActivity.this.setResult(RESULT_OK, i);
                 finish();
             }
@@ -54,7 +53,7 @@ public class AddReviewActivity extends Activity {
     }
 
     private void setRating(double rating) {
-        reviews.getReviews().get(0).setRating((int)rating);
+        outgoing.setRating((int)rating);
         ImageView ratingView = findViewById(R.id.review_rating);
         ratingView.setPadding(Utility.getInstance().getPadding(rating),0,0,0);
         ratingView.setColorFilter(Utility.getInstance().reviewToColor(rating), PorterDuff.Mode.MULTIPLY);

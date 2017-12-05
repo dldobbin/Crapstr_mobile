@@ -16,7 +16,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
  */
 
 class Utility {
-    public static final String baseURL = "http://crapstr-backend.herokuapp.com";
+    static final String baseURL = "http://crapstr-backend.herokuapp.com";
 
     private Drawable icon;
     private Resources res;
@@ -39,6 +39,9 @@ class Utility {
     }
 
     int reviewToColor(double rating) {
+        if (rating == 0) {
+            return Color.WHITE;
+        }
         float[] hsv = new float[3];
         Color.RGBToHSV(255,0,0, hsv);
         float red = hsv[0];
@@ -52,14 +55,5 @@ class Utility {
         double wholePart = Math.floor(rating);
         double remainder = rating - wholePart;
         return (int)((wholePart + 2) * res.getDimensionPixelSize(R.dimen.rating_padding_interval) + (remainder > 0 ? res.getDimensionPixelSize(R.dimen.rating_remainder_padding_interval) : 0));
-    }
-
-    String prepForPost(Reviews reviews) {
-        Review review = reviews.getReviews().get(0);
-        return "placeId=" + reviews.getPlaceId() + "&rating=" + review.getRating() + "&description=" + review.getDescription();
-    }
-
-    String prepForPost(Location location, Reviews reviews) {
-        return prepForPost(reviews) + "&lon=" + location.getLon() + "&lat=" + location.getLat();
     }
 }

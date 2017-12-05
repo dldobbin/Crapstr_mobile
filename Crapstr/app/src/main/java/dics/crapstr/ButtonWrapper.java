@@ -10,7 +10,7 @@ import android.util.AttributeSet;
  */
 
 public class ButtonWrapper extends android.support.v7.widget.AppCompatButton {
-    private String placeId;
+    private Outgoing outgoing;
 
     public ButtonWrapper(Context context) {
         super(context);
@@ -20,11 +20,11 @@ public class ButtonWrapper extends android.support.v7.widget.AppCompatButton {
         super(context, attrs);
     }
 
-    public String getPlaceId() {
-        return placeId;
+    public Outgoing getOutgoing() {
+        return outgoing;
     }
 
-    public void setPlaceId(String placeId) {
-        this.placeId = placeId;
+    public void setOutgoing(Outgoing outgoing) {
+        this.outgoing = outgoing;
     }
 }
